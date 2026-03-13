@@ -46,8 +46,8 @@ def img_to_data_uri(path: Path):
     return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode("utf-8")
 
 def team_badge_html(team: str, size=38):
-    uri = img_to_data_uri(ASSETS_DIR / f"{team}.png")
     team_clean = team.split(" (")[0]
+    uri = img_to_data_uri(ASSETS_DIR / f"{team_clean}.png")
     coach = TEAM_META[team_clean]["coach"]
     return f"""
     <div style="display:flex;align-items:center;gap:10px;">
@@ -57,7 +57,7 @@ def team_badge_html(team: str, size=38):
         <div style="font-size:12px;opacity:.78;line-height:1.1;">Coach: {coach}</div>
       </div>
     </div>
-    """
+        """
 
 def compute_group_tables(state):
     tables = {}
