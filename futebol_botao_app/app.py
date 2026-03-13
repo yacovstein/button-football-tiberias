@@ -64,21 +64,31 @@ def team_badge_html(team: str, size=38):
 def compute_group_tables(state):
     tables = {}
     for group, teams in state["groups"].items():
-       stats = {team: {"Equipe":team,"Grupo":group,"Coach":TEAM_META[team.split(" (")[0]]["coach"],"Pts":0,"V":0,"E":0,"D":0,"GP":0,"GC":0,"SG":0,"J":0} for team in teams}
+        stats = {team: {"Equipe":team,"Grupo":group,"Coach":TEAM_META[team.split(" (")[0]]["coach"],"Pts":0,"V":0,"E":0,"D":0,"GP":0,"GC":0,"SG":0,"J":0} for team in teams}
         for match in state["fixtures"]:
             if match["group"] != group or match["home_goals"] is None or match["away_goals"] is None:
                 continue
             hg, ag = match["home_goals"], match["away_goals"]
             h, a = match["home"], match["away"]
-            stats[h]["J"] += 1; stats[a]["J"] += 1
-            stats[h]["GP"] += hg; stats[h]["GC"] += ag
-            stats[a]["GP"] += ag; stats[a]["GC"] += hg
+            stats[h]["J"] += 1
+            stats[a]["J"] += 1
+            stats[h]["GP"] += hg
+            stats[h]["GC"] += ag
+            stats[a]["GP"] += ag
+            stats[a]["GC"] += hg
             if hg > ag:
-                stats[h]["Pts"] += 3; stats[h]["V"] += 1; stats[a]["D"] += 1
+                stats[h]["Pts"] += 3
+                stats[h]["V"] += 1
+                stats[a]["D"] += 1
             elif ag > hg:
-                stats[a]["Pts"] += 3; stats[a]["V"] += 1; stats[h]["D"] += 1
+                stats[a]["Pts"] += 3
+                stats[a]["V"] += 1
+                stats[h]["D"] += 1
             else:
-                stats[h]["Pts"] += 1; stats[a]["Pts"] += 1; stats[h]["E"] += 1; stats[a]["E"] += 1
+                stats[h]["Pts"] += 1
+                stats[a]["Pts"] += 1
+                stats[h]["E"] += 1
+                stats[a]["E"] += 1
         for team in teams:
             stats[team]["SG"] = stats[team]["GP"] - stats[team]["GC"]
         table = pd.DataFrame(stats.values()).sort_values(by=["Pts","V","SG","GP","Equipe"], ascending=[False,False,False,False,True], ignore_index=True)
