@@ -35,7 +35,7 @@ TEAM_META = {
 
 
 def load_state():
-    return json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else load_seed()
+    return json.loads(STATE_FILE.read_text(encoding="utf-8")) 
 
 def save_state(state):
     STATE_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
