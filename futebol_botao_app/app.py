@@ -64,7 +64,7 @@ def team_badge_html(team: str, size=38):
 def compute_group_tables(state):
     tables = {}
     for group, teams in state["groups"].items():
-        stats = {team: {"Equipe":team,"Grupo":group,"Coach":TEAM_META[team.split(" (")[0]["coach"],"Pts":0,"V":0,"E":0,"D":0,"GP":0,"GC":0,"SG":0,"J":0} for team in teams}
+        stats = {team: {"Equipe":team,"Grupo":group,"Coach":TEAM_META[team.split(" (")[0]]["coach"],"Pts":0,"V":0,"E":0,"D":0,"GP":0,"GC":0,"SG":0,"J":0} for team in teams}
         for match in state["fixtures"]:
             if match["group"] != group or match["home_goals"] is None or match["away_goals"] is None:
                 continue
