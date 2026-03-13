@@ -6,7 +6,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Tiberias / Migdal 2026 Button Football Championship", page_icon="🏆", layout="wide")
 APP_DIR = Path(__file__).parent
-DATA_FILE = APP_DIR / "seed_data.json"
 STATE_FILE = APP_DIR / "state.json"
 ASSETS_DIR = APP_DIR / "assets_real"
 COVER_FILE = APP_DIR / "cover.png"
@@ -34,8 +33,6 @@ TEAM_META = {
     "Vasco": {"coach":"Yehoshua","colors":["#111111","#FFFFFF"]},
 }
 
-def load_seed():
-    return json.loads(DATA_FILE.read_text(encoding="utf-8"))
 
 def load_state():
     return json.loads(STATE_FILE.read_text(encoding="utf-8")) if STATE_FILE.exists() else load_seed()
