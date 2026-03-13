@@ -47,7 +47,8 @@ def img_to_data_uri(path: Path):
 
 def team_badge_html(team: str, size=38):
     uri = img_to_data_uri(ASSETS_DIR / f"{team}.png")
-    coach = TEAM_META[team]["coach"]
+   team_clean = team.split(" (")[0]
+coach = TEAM_META[team_clean]["coach"]
     return f"""
     <div style="display:flex;align-items:center;gap:10px;">
       <img src="{uri}" width="{size}" height="{size}" style="object-fit:contain;background:rgba(255,255,255,.04);border-radius:10px;padding:2px;" />
