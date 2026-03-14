@@ -84,15 +84,14 @@ def team_badge_html(display_name: str, size: int = 40) -> str:
     team_key = canonical_team(display_name)
     uri = img_to_data_uri(ASSETS_DIR / f"{team_key}.png")
     coach = TEAM_META.get(team_key, {}).get("coach", "Unknown")
-    return f'''
-    <div style="display:flex;align-items:center;gap:10px;">
-      <img src="{uri}" width="{size}" height="{size}" style="object-fit:contain;background:rgba(255,255,255,.04);border-radius:10px;padding:2px;" />
-      <div>
-        <div style="font-weight:700;line-height:1.1;">{display_name}</div>
-        <div style="font-size:12px;opacity:.78;line-height:1.1;">Coach: {coach}</div>
-      </div>
-    </div>
-    '''
+
+    return f"""<div style="display:flex;align-items:center;gap:10px;">
+<img src="{uri}" width="{size}" height="{size}" style="object-fit:contain;background:rgba(255,255,255,.04);border-radius:10px;padding:2px;" />
+<div>
+<div style="font-weight:700;line-height:1.1;">{display_name}</div>
+<div style="font-size:12px;opacity:.78;line-height:1.1;">Coach: {coach}</div>
+</div>
+</div>"""
 
 
 def compute_group_tables(state: dict) -> dict:
