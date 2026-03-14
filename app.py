@@ -371,29 +371,187 @@ with tab2:
 
 with tab3:
     tables = compute_group_tables(state)
-    qualified, _ = overall_qualified(tables)
-    qf, sf, final = get_knockout_structure(qualified, state)
-    st.markdown("### Quarterfinals")
-    for match in qf:
-        st.markdown("<div class='glass'>", unsafe_allow_html=True)
-        knockout_card(match, state)
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("### Semifinals")
-    for match in sf:
-        st.markdown("<div class='glass'>", unsafe_allow_html=True)
-        knockout_card(match, state)
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("### Final")
-    st.markdown("<div class='glass'>", unsafe_allow_html=True)
-    knockout_card(final, state)
-    st.markdown("</div>", unsafe_allow_html=True)
-    if final["winner"]:
-        champ = final["winner"]
-        key = canonical_team(champ)
-        uri = img_to_data_uri(ASSETS_DIR / f"{key}.png")
-        coach = TEAM_META.get(key, {}).get("coach", "Unknown")
-        st.markdown(f'<div class="glass" style="text-align:center;background:linear-gradient(135deg,#caa24e, #0d1320);padding:20px;"><div style="font-size:13px;letter-spacing:1px;opacity:.9;">CHAMPION</div><img src="{uri}" width="110" style="object-fit:contain;margin:8px auto 10px auto;display:block;" /><div style="font-size:32px;font-weight:900;">{champ}</div><div style="margin-top:6px;">Coach: {coach}</div></div>', unsafe_allow_html=True)
+    qualified, overall = overall_qualified(tables)
 
+    top8 = overall.head(8)["Equipe"].tolist()
+
+    st.markdown("### Knockout stage")
+
+    if len(top8) < 8:
+        st.warning("Complete the group stage to generate the knockout bracket.")
+    else:
+        # Inicializa estrutura do mata-mata
+        if "knockout" not in state:
+            state["knockout"] = {}
+
+        pairs_qf = [
+            ("QF1", top8[0], top8[7]),
+            ("QF2", top8[1], top8[6]),
+            ("QF3", top8[2], top8[5]),
+            ("QF4", top8[3], top8[4]),
+        ]
+
+        st.markdown("## Quarterfinals")
+
+        qf_winners = []
+
+        for code, team1, team2 in pairs_qf:
+            if code not in state["knockout"]:
+                state["knockout"][code] = {"g1": 0, "g2": 0, "played": False}
+
+            match = state["knockout"][code]
+
+            st.markdown("<div class='glass'>", unsafe_allow_html=True)
+            c1, c2, c3 = st.columns([3, 2, 3])
+
+            with c1:
+                st.markdown(team_badge_html(team1, 42), unsafe_allow_html=True)
+
+            with c2:
+                a, b, c = st.columns([1, 0.5, 1])
+                g1 = a.number_input(f"{code}_g1", min_value=0, step=1, value=int(match["g1"]))
+                b.markdown("<div style='text-align:center;font-size:24px;padding-top:6px;'>x</div>", unsafe_allow_html=True)
+                g2 = c.number_input(f"{code}_g2", min_value=0, step=1, value=int(match["g2"]))
+
+                if st.button(f"Save {code}", key=f"save_{code}", use_container_width=True):
+                    state["knockout"][code] = {"g1": int(g1), "g2": int(g2), "played": True}
+                    save_state(state)
+                    st.rerun()
+
+            with c3:
+                st.markdown(team_badge_html(team2, 42), unsafe_allow_html=True)
+
+            if match.get("played"):
+                if match["g1"] > match["g2"]:
+                    winner = team1
+                elif match["g2"] > match["g1"]:
+                    winner = team2
+                else:
+                    winner = None
+
+                if winner:
+                    st.success(f"Qualified: {winner}")
+                    qf_winners.append(winner)
+                else:
+                    st.warning("Draw detected. Please decide a winner with a non-draw score.")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("## Semifinals")
+
+        sf_winners = []
+
+        if len(qf_winners) == 4:
+            pairs_sf = [
+                ("SF1", qf_winners[0], qf_winners[1]),
+                ("SF2", qf_winners[2], qf_winners[3]),
+            ]
+
+            for code, team1, team2 in pairs_sf:
+                if code not in state["knockout"]:
+                    state["knockout"][code] = {"g1": 0, "g2": 0, "played": False}
+
+                match = state["knockout"][code]
+
+                st.markdown("<div class='glass'>", unsafe_allow_html=True)
+                c1, c2, c3 = st.columns([3, 2, 3])
+
+                with c1:
+                    st.markdown(team_badge_html(team1, 42), unsafe_allow_html=True)
+
+                with c2:
+                    a, b, c = st.columns([1, 0.5, 1])
+                    g1 = a.number_input(f"{code}_g1", min_value=0, step=1, value=int(match["g1"]))
+                    b.markdown("<div style='text-align:center;font-size:24px;padding-top:6px;'>x</div>", unsafe_allow_html=True)
+                    g2 = c.number_input(f"{code}_g2", min_value=0, step=1, value=int(match["g2"]))
+
+                    if st.button(f"Save {code}", key=f"save_{code}", use_container_width=True):
+                        state["knockout"][code] = {"g1": int(g1), "g2": int(g2), "played": True}
+                        save_state(state)
+                        st.rerun()
+
+                with c3:
+                    st.markdown(team_badge_html(team2, 42), unsafe_allow_html=True)
+
+                if match.get("played"):
+                    if match["g1"] > match["g2"]:
+                        winner = team1
+                    elif match["g2"] > match["g1"]:
+                        winner = team2
+                    else:
+                        winner = None
+
+                    if winner:
+                        st.success(f"Qualified: {winner}")
+                        sf_winners.append(winner)
+                    else:
+                        st.warning("Draw detected. Please decide a winner with a non-draw score.")
+
+                st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("Semifinals will appear after all quarterfinals are completed.")
+
+        st.markdown("## Final")
+
+        if len(sf_winners) == 2:
+            code = "FINAL"
+            team1, team2 = sf_winners[0], sf_winners[1]
+
+            if code not in state["knockout"]:
+                state["knockout"][code] = {"g1": 0, "g2": 0, "played": False}
+
+            match = state["knockout"][code]
+
+            st.markdown("<div class='glass'>", unsafe_allow_html=True)
+            c1, c2, c3 = st.columns([3, 2, 3])
+
+            with c1:
+                st.markdown(team_badge_html(team1, 48), unsafe_allow_html=True)
+
+            with c2:
+                a, b, c = st.columns([1, 0.5, 1])
+                g1 = a.number_input(f"{code}_g1", min_value=0, step=1, value=int(match["g1"]))
+                b.markdown("<div style='text-align:center;font-size:26px;padding-top:6px;'>x</div>", unsafe_allow_html=True)
+                g2 = c.number_input(f"{code}_g2", min_value=0, step=1, value=int(match["g2"]))
+
+                if st.button(f"Save {code}", key=f"save_{code}", use_container_width=True):
+                    state["knockout"][code] = {"g1": int(g1), "g2": int(g2), "played": True}
+                    save_state(state)
+                    st.rerun()
+
+            with c3:
+                st.markdown(team_badge_html(team2, 48), unsafe_allow_html=True)
+
+            if match.get("played"):
+                if match["g1"] > match["g2"]:
+                    champion = team1
+                elif match["g2"] > match["g1"]:
+                    champion = team2
+                else:
+                    champion = None
+
+                if champion:
+                    key = canonical_team(champion)
+                    uri = img_to_data_uri(ASSETS_DIR / f"{key}.png")
+                    coach = TEAM_META.get(key, {}).get("coach", "Unknown")
+
+                    st.markdown(
+                        f"""
+                        <div class='glass' style='text-align:center;background:linear-gradient(135deg,#caa24e,#0d1320);padding:24px;'>
+                            <div style='font-size:14px;letter-spacing:1px;opacity:.9;'>CHAMPION</div>
+                            <img src="{uri}" width="120" style="object-fit:contain;margin:12px auto;display:block;" />
+                            <div style='font-size:34px;font-weight:900;'>{champion}</div>
+                            <div style='margin-top:6px;font-size:16px;'>Coach: {coach}</div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.warning("Draw detected. Please decide the champion with a non-draw score.")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            st.info("The final will appear after both semifinals are completed.")
 with tab4:
     st.subheader("Teams by coach")
     coaches = {}
