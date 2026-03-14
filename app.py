@@ -256,28 +256,29 @@ def render_seed_cards(overall: pd.DataFrame) -> None:
         key = canonical_team(team)
         colors = TEAM_META.get(key, {}).get("colors", ["#444444", "#FFFFFF"])
 
-        card_html = f"""
-        <div style="
-            background: linear-gradient(135deg, {colors[0]} 0%, #0d1320 100%);
-            border: 1px solid rgba(255,255,255,.10);
-            border-radius: 18px;
-            padding: 14px;
-            box-shadow: 0 10px 24px rgba(0,0,0,.24);
-            margin-bottom: 12px;
-        ">
-            <div style="font-size:12px;opacity:.88;">Seed #{int(row["Seed"])}</div>
-            {team_badge_html(team, 48)}
-            <div style="display:flex;gap:14px;margin-top:12px;font-size:13px;">
-                <div><b>{int(row["Pts"])}</b><br/>Pts</div>
-                <div><b>{int(row["V"])}</b><br/>W</div>
-                <div><b>{int(row["SG"])}</b><br/>GD</div>
-                <div><b>{int(row["GP"])}</b><br/>GF</div>
-            </div>
-        </div>
-        """
-
         with cols[i % 4]:
-            st.markdown(card_html, unsafe_allow_html=True)
+            st.markdown(
+                f"""
+                <div style="
+                    background: linear-gradient(135deg, {colors[0]} 0%, #0d1320 100%);
+                    border: 1px solid rgba(255,255,255,.10);
+                    border-radius: 18px;
+                    padding: 14px;
+                    box-shadow: 0 10px 24px rgba(0,0,0,.24);
+                    margin-bottom: 12px;
+                ">
+                    <div style="font-size:12px;opacity:.88;">Seed #{int(row["Seed"])}</div>
+                    {team_badge_html(team, 48)}
+                    <div style="display:flex;gap:14px;margin-top:12px;font-size:13px;">
+                        <div><b>{int(row["Pts"])}</b><br/>Pts</div>
+                        <div><b>{int(row["V"])}</b><br/>W</div>
+                        <div><b>{int(row["SG"])}</b><br/>GD</div>
+                        <div><b>{int(row["GP"])}</b><br/>GF</div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
 
 def knockout_card(match: dict, state: dict) -> None:
